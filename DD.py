@@ -11,20 +11,25 @@ sum=0
 counter=0
 try:
     while stop-start<10:
+        highest=0
         counter+=1
         GPIO.setup(GPIO_ILED,GPIO.OUT)
         GPIO.output(GPIO_ILED, False)
         time.sleep(0.5)
         GPIO.output(GPIO_ILED, True)
         adc = mcp3008.MCP3008()
-        time.sleep(0.00028) #SamplingTime: highest at 0.28ms
-        voMeasured = adc.read([mcp3008.CH1])
+        #time.sleep(0.00028) #SamplingTime: highest at 0.28ms
+        acess_start=time.time()
+        while time.time()-acess_start<0.001:
+            voMeasured = adc.read([mcp3008.CH1])
+            if voMeasured[0]>highest:
+                highest=voMeasured[0]
         time.sleep(0.00004) #deltaTime
         GPIO.output(GPIO_ILED, False)
         time.sleep(0.009680) #sleepTime
         adc.close()
-        print"- Dust Density: ",voMeasured[0],"ug/m3"
-        sum+=voMeasured[0]
+        print"- Dust Density: ",highest,"ug/m3"
+        sum+=highest
         stop = time.time()
         time.sleep(0.5)
     if sum/counter<=15:
